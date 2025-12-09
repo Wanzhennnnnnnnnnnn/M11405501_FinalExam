@@ -1,0 +1,12 @@
+CREATE DATABASE IF NOT EXISTS finalexam_db;
+USE finalexam_db;
+
+DROP TABLE IF EXISTS ``;
+CREATE TABLE `` (
+  
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO 
+
+
+

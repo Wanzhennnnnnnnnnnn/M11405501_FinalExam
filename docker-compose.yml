@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  mysql_db:
+    image: mysql:8.0
+    container_name: finalexam_db_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 417
+      MYSQL_DATABASE: finalexam_db      
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - finalexam-net
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: finalexam_web_container
+    restart: always
+    environment:
+      DB_HOST: mysql_db
+      DB_USER: root
+      DB_PASSWORD: 417
+      DB_NAME: finalexam_db
+      NODE_ENV: development
+    ports:
+      - "3000:80"
+    depends_on:
+      mysql_db:
+        condition: service_healthy
+    networks:
+      - finalexam-net
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: nodemon -L app.js
+
+volumes:
+  mysql_data:
+    external: false
+
+networks:
+  finalexam-net:
+    driver: bridge
