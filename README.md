@@ -1,3 +1,4 @@
+```mermaid
 erDiagram
     %% ---------------------------------------------------------
     %% 1. 地區 (Region)
@@ -62,3 +63,4 @@ erDiagram
     SubRegion ||--o{ Intermediate_Region : "包含"
     Intermediate_Region ||--|{ Country : "包含"
     Country ||--o{ SRB_Data : "擁有"
+    ```
