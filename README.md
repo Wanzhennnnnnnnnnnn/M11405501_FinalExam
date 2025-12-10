@@ -1,6 +1,3 @@
-# M11405501_FinalExam
-
-```mermaid
 erDiagram
     %% ---------------------------------------------------------
     %% 1. 地區 (Region)
@@ -59,9 +56,9 @@ erDiagram
 
     %% ---------------------------------------------------------
     %% 關係定義 (Relationships)
+    %% 修正處：補上了冒號與描述文字，這是 Mermaid 語法的必要條件
     %% ---------------------------------------------------------
-    Region ||--|{ SubRegion 
-    SubRegion ||--o{ Intermediate_Region
-    Intermediate_Region ||--|{ Country
-    Country ||--o{ SRB_Data
-```
+    Region ||--|{ SubRegion : "包含"
+    SubRegion ||--o{ Intermediate_Region : "包含"
+    Intermediate_Region ||--|{ Country : "包含"
+    Country ||--o{ SRB_Data : "擁有"
