@@ -10,7 +10,9 @@ services:
       MYSQL_DATABASE: finalexam_db      
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./ETL.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./data1.csv:/var/lib/mysql-files/data1.csv
+      - ./data2.csv:/var/lib/mysql-files/data2.csv
     ports:
       - "3307:3306"
     healthcheck:
