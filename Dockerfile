@@ -8,15 +8,10 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-# RUN npm ci --only=production
 RUN npm install && npm install -g nodemon
-
 
 # Copy application source
 COPY . .
-
-# Copy Docker-specific config as config.js
-COPY config.docker.js config.js
 
 # Expose port 80
 EXPOSE 80

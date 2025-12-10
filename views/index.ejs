@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRB Data Management System</title>
+    <!-- Tailwind CSS (Keep CDN for simplicity) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <nav class="nav-header p-4 mb-6">
+        <div class="container mx-auto">
+            <h1 class="text-xl font-bold">
+                <i class="fas fa-database mr-2"></i>SRB Data Management System
+            </h1>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 layout-container">
+        
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-400 mb-6 pl-2" style="border-color: #ccc;">
+            <button onclick="switchTab('query')" id="tab-query" class="tab-btn active">
+                Data Query
+            </button>
+            <button onclick="switchTab('manage')" id="tab-manage" class="tab-btn">
+                Maintenance
+            </button>
+        </div>
+
+        <!-- Tab 1: Query (Vertical Stack Layout) -->
+        <div id="view-query" class="flex flex-col">
+            
+            <!-- Function 1 -->
+            <div class="simple-card">
+                <div class="flex items-center mb-4 border-b border-gray-300 pb-2">
+                    <h3 class="font-bold text-lg">Country Annual Trend</h3>
+                    <i class="fas fa-circle-info info-icon" onclick="toggleDesc('d1')" title="Click to show/hide details"></i>
+                </div>
+                <div id="d1" class="desc-text hidden">
+                    Select a country to display its Sex Ratio at Birth (SRB) trend over the years sorted chronologically.
+                </div>
+
+                <div class="row-group">
+                    <span class="row-label">Country:</span>
+                    <div class="flex-grow">
+                        <select id="q1-country" class="input-box">
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+                    <button onclick="runQuery1()" class="btn-submit">Search</button>
+                </div>
+                
+                <!-- 結果區塊 1 -->
+                <div id="result-q1" class="hidden mt-4">
+                    <!-- 收合按鈕列 -->
+                    <div class="flex justify-end mb-2">
+                        <button onclick="closeResult('result-q1')" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 px-3 py-1 rounded transition flex items-center">
+                            <i class="fas fa-chevron-up mr-1"></i> Collapse Result
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th>Year</th><th>SRB Value</th></tr>
+                        </thead>
+                        <tbody id="tbody-q1"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Function 2 -->
+            <div class="simple-card">
+                <div class="flex items-center mb-4 border-b border-gray-300 pb-2">
+                    <h3 class="font-bold text-lg">Sub-Region Ranking</h3>
+                    <i class="fas fa-circle-info info-icon" onclick="toggleDesc('d2')" title="Click to show/hide details"></i>
+                </div>
+                <div id="d2" class="desc-text hidden">
+                    View a ranking of all countries within a selected Sub-Region for a specific year, ordered by SRB (highest to lowest).
+                </div>
+
+                <div class="row-group">
+                    <span class="row-label">Sub-Region:</span>
+                    <div class="flex-grow">
+                        <select id="q2-subregion" class="input-box">
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row-group">
+                    <span class="row-label">Year:</span>
+                    <div class="flex-grow">
+                        <!-- 修改處：移除寫死的 2023, 2022，交由 JS 動態填入 -->
+                        <select id="q2-year" class="input-box">
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+                    <button onclick="runQuery2()" class="btn-submit">Rank</button>
+                </div>
+
+                <!-- 結果區塊 2 -->
+                <div id="result-q2" class="hidden mt-4">
+                    <div class="flex justify-end mb-2">
+                        <button onclick="closeResult('result-q2')" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 px-3 py-1 rounded transition flex items-center">
+                            <i class="fas fa-chevron-up mr-1"></i> Collapse Result
+                        </button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th>Rank</th><th>Country</th><th>Value</th></tr>
+                        </thead>
+                        <tbody id="tbody-q2"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Function 3 -->
+            <div class="simple-card">
+                <div class="flex items-center mb-4 border-b border-gray-300 pb-2">
+                    <h3 class="font-bold text-lg">Region Max Statistics</h3>
+                    <i class="fas fa-circle-info info-icon" onclick="toggleDesc('d3')" title="Click to show/hide details"></i>
+                </div>
+                <div id="d3" class="desc-text hidden">
+                    Select a Region to see the maximum SRB value recorded in each of its Sub-Regions for a specific year.
+                </div>
+
+                <div class="row-group">
+                    <span class="row-label">Region:</span>
+                    <div class="flex-grow">
+                        <select id="q3-region" class="input-box">
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row-group">
+                    <span class="row-label">Year:</span>
+                    <div class="flex-grow">
+                        <!-- 修改處：移除寫死的年份 -->
+                        <select id="q3-year" class="input-box">
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+                    <button onclick="runQuery3()" class="btn-submit">Stats</button>
+                </div>
+
+                <!-- 結果區塊 3 -->
+                <div id="result-q3" class="hidden mt-4">
+                    <div class="flex justify-end mb-2">
+                        <button onclick="closeResult('result-q3')" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 px-3 py-1 rounded transition flex items-center">
+                            <i class="fas fa-chevron-up mr-1"></i> Collapse Result
+                        </button>
+                    </div>
+                    <table>
+                        <thead><tr><th>Sub-Region</th><th>Max Value</th></tr></thead>
+                        <tbody id="tbody-q3"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Function 4 -->
+            <div class="simple-card">
+                <div class="flex items-center mb-4 border-b border-gray-300 pb-2">
+                    <h3 class="font-bold text-lg">Keyword Search</h3>
+                    <i class="fas fa-circle-info info-icon" onclick="toggleDesc('d4')" title="Click to show/hide details"></i>
+                </div>
+                <div id="d4" class="desc-text hidden">
+                    Search for countries by name (partial match supported) to quickly view their latest available SRB data.
+                </div>
+
+                <div class="row-group">
+                    <span class="row-label">Keyword:</span>
+                    <div class="flex-grow">
+                        <input type="text" id="q4-keyword" placeholder="e.g., Ar" class="input-box">
+                    </div>
+                    <button onclick="runQuery4()" class="btn-submit">Search</button>
+                </div>
+
+                <!-- 結果區塊 4 -->
+                <div id="result-q4" class="hidden mt-4">
+                    <div class="flex justify-end mb-2">
+                        <button onclick="closeResult('result-q4')" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 px-3 py-1 rounded transition flex items-center">
+                            <i class="fas fa-chevron-up mr-1"></i> Collapse Result
+                        </button>
+                    </div>
+                    <table>
+                        <thead><tr><th>Country</th><th>Latest Value</th></tr></thead>
+                        <tbody id="tbody-q4"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Maintenance (Vertical Stack Layout) -->
+        <div id="view-manage" class="hidden flex flex-col">
+            
+            <!-- Function 5 -->
+            <div class="simple-card">
+                <div class="flex items-center mb-4 border-b border-gray-300 pb-2">
+                    <h3 class="font-bold text-lg">Add New Record</h3>
+                    <i class="fas fa-circle-info info-icon" onclick="toggleDesc('d5')" title="Click to show/hide details"></i>
+                </div>
+                <div id="d5" class="desc-text hidden">
+                    Add a new SRB record for a country. The system automatically detects the latest year and sets the new record for the following year.
+                </div>
+
+                <div class="row-group">
+                    <span class="row-label">Country:</span>
+                    <div class="flex-grow">
+                        <select id="m5-country" class="input-box">
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3 ml-20">Latest Year: <span id="m5-latest-year" class="font-bold">--</span></p>
+                <div class="row-group">
+                    <span class="row-label">Value:</span>
+                    <div class="flex-grow">
+                        <input type="number" step="0.01" id="m5-value" class="input-box" placeholder="e.g., 105.5">
+                    </div>
+                    <button onclick="runCRUD5()" class="btn-submit">Add</button>
+                </div>
+            </div>
+
+            <!-- Function 6 -->
+            <div class="simple-card">
+                <div class="flex items-center mb-4 border-b border-gray-300 pb-2">
+                    <h3 class="font-bold text-lg">Update Record</h3>
+                    <i class="fas fa-circle-info info-icon" onclick="toggleDesc('d6')" title="Click to show/hide details"></i>
+                </div>
+                <div id="d6" class="desc-text hidden">
+                    Correct or update an existing SRB value for a specific country and year.
+                </div>
+
+                <div class="row-group">
+                    <span class="row-label">Country:</span>
+                    <div class="flex-grow">
+                        <select id="m6-country" class="input-box" onchange="updateM6Years()">
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row-group">
+                    <span class="row-label">Year:</span>
+                    <div class="flex-grow">
+                        <select id="m6-year" class="input-box">
+                            <option>Select Country First</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row-group">
+                    <span class="row-label">New Value:</span>
+                    <div class="flex-grow">
+                        <input type="number" step="0.01" id="m6-value" class="input-box">
+                    </div>
+                    <button onclick="runCRUD6()" class="btn-submit">Update</button>
+                </div>
+            </div>
+
+            <!-- Function 7 -->
+            <div class="simple-card">
+                <div class="flex items-center mb-4 border-b border-gray-300 pb-2">
+                    <h3 class="font-bold text-lg">Delete Records</h3>
+                    <i class="fas fa-circle-info info-icon" onclick="toggleDesc('d7')" title="Click to show/hide details"></i>
+                </div>
+                <div id="d7" class="desc-text hidden">
+                    Permanently delete all SRB records for a selected country that fall within the specified start and end years.
+                </div>
+
+                <div class="row-group">
+                    <span class="row-label">Country:</span>
+                    <div class="flex-grow">
+                        <select id="m7-country" class="input-box">
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row-group">
+                    <span class="row-label">From:</span>
+                    <input type="number" id="m7-start" class="input-box" placeholder="YYYY" style="width: 100px;">
+                    <span class="row-label" style="min-width: auto; margin: 0 10px;">To:</span>
+                    <input type="number" id="m7-end" class="input-box" placeholder="YYYY" style="width: 100px;">
+                    <div class="flex-grow"></div> <!-- Spacer -->
+                    <button onclick="runCRUD7()" class="btn-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Frontend Logic -->
+    <script src="/js/script.js"></script>
+</body>
+</html>

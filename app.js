@@ -1,169 +1,30 @@
 const express = require('express');
-const cookieParser = require('cookie-parser');
 const path = require('path');
-const fs = require('fs');
-const mysql = require('mysql2/promise');
-
-
-// Config 載入邏輯 
-let config;
-try {
-    if (process.env.DB_HOST && fs.existsSync(path.join(__dirname, 'config.docker.js'))) {
-        config = require('./config.docker');
-        console.log('Using config.docker.js settings');
-    } else {
-        config = require('./config');
-    }
-} catch (err) {
-    console.warn('Warning: config.js not found, attempting to fall back or use defaults.');
-    try {
-        config = require('./config.docker');
-    } catch (e) {
-        console.error('Critical: No configuration file found (config.js or config.docker.js).');
-        process.exit(1);
-    }
-}
-
+const config = require('./config'); // 重要：載入 config 設定
 const app = express();
-app.set('view engine', 'hjs');
-app.set('views', path.join(__dirname, 'views'));
+
+// 重要：從 config 讀取 PORT。
+// 在 Docker 中 config.port 會是 80，這符合 docker-compose 的 "3000:80" 設定
+const port = config.port || 3000;
+
+// *** 關鍵修正：加入 Body Parser Middleware ***
+// 必須在載入路由之前加入這些設定，否則 req.body 會是 undefined
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser('secretingredient'));
+
+// 設定 View Engine
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+// 設定靜態檔案
 app.use(express.static(path.join(__dirname, 'public')));
 
-const pool = mysql.createPool(config.db);
+// 載入路由 (必須在 body parser 之後)
+const indexRouter = require('./routes/index');
+app.use('/', indexRouter);
 
-// --- 公開路由 ---
-
-app.get('/', (req, res) => res.redirect('/login'));
-
-app.get('/login', (req, res) => {
-    res.render('login', { error: req.cookies.error });
-    res.clearCookie('error');
+// 啟動伺服器
+app.listen(port, () => {
+  console.log(`Server is running at port ${port}`);
+  console.log(`Inside Docker? DB Host is: ${config.db.host}`);
 });
-
-app.get('/register', (req, res) => {
-    res.render('register', { error: req.cookies.error });
-    res.clearCookie('error');
-});
-
-app.get('/forgot-password', (req, res) => {
-    res.render('forgotPassword', { 
-        error: req.cookies.error,
-        success: req.cookies.success 
-    });
-    res.clearCookie('error');
-    res.clearCookie('success');
-});
-
-// --- 認證路由 (Login/Register/Forgot PW) ---
-
-// 登入
-app.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        
-        // ★★★ 明天注意：如果不叫 Contractors 表，記得改這裡的 Table 名稱 ★★★
-        const [rows] = await pool.execute('SELECT * FROM Contractors WHERE Email = ?', [email]);
-        
-        if (rows.length === 0 || rows[0].Password !== password) {
-            res.cookie('error', '帳號或密碼錯誤', { maxAge: 10000 });
-            return res.redirect('/login');
-        }
-
-        const user = rows[0];
-        res.cookie('loggedIn', 'true', { signed: true });
-        // ★★★ 明天注意：如果 ID 欄位不叫 ContractorID，記得改這裡 ★★★
-        res.cookie('userId', user.ContractorID, { signed: true });
-        res.cookie('username', user.Name, { signed: true });
-
-        // ★★★ 原本是跳到 /contractor/dashboard，現在改為跳到下方新建立的簡單 Dashboard ★★★
-        res.redirect('/dashboard');
-
-    } catch (err) {
-        console.error(err);
-        res.redirect('/login');
-    }
-});
-
-// 註冊
-app.post('/register', async (req, res) => {
-    try {
-        const { name, email, password, phone, address } = req.body;
-        
-        const [exists] = await pool.execute('SELECT 1 FROM Contractors WHERE Email = ?', [email]);
-        if (exists.length > 0) {
-            res.cookie('error', 'Email 已被註冊', { maxAge: 10000 });
-            return res.redirect('/register');
-        }
-
-        await pool.execute(
-            'INSERT INTO Contractors (Name, Email, Password, PhoneNumber, Address) VALUES (?, ?, ?, ?, ?)',
-            [name, email, password, phone, address]
-        );
-
-        res.cookie('success', '註冊成功，請登入', { maxAge: 10000 });
-        res.redirect('/login');
-
-    } catch (err) {
-        console.error(err);
-        res.redirect('/register');
-    }
-});
-
-// 忘記密碼
-app.post('/forgot-password', async (req, res) => {
-    try {
-        const { username, new_password } = req.body;
-        const email = username;
-
-        const [users] = await pool.execute('SELECT * FROM Contractors WHERE Email = ?', [email]);
-
-        if (users.length === 0) {
-            res.cookie('error', '找不到此 Email 帳號', { maxAge: 10000 });
-            return res.redirect('/forgot-password');
-        }
-
-        await pool.execute('UPDATE Contractors SET Password = ? WHERE Email = ?', [new_password, email]);
-
-        res.cookie('success', '密碼重設成功，請使用新密碼登入', { maxAge: 10000 });
-        return res.redirect('/login');
-
-    } catch (err) {
-        console.error(err);
-        res.cookie('error', '系統錯誤，請稍後再試', { maxAge: 10000 });
-        return res.redirect('/forgot-password');
-    }
-});
-
-app.get('/logout', (req, res) => {
-    res.clearCookie('loggedIn');
-    res.clearCookie('userId');
-    res.clearCookie('username');
-    res.redirect('/login');
-});
-
-// --- 中間件 (檢查是否登入) ---
-const checkLogin = (req, res, next) => {
-    if (req.signedCookies.loggedIn === 'true') {
-        res.locals.username = req.signedCookies.username;
-        res.locals.userId = req.signedCookies.userId;
-        next();
-    } else {
-        res.redirect('/login');
-    }
-};
-
-
-// 新增一個簡單的登入後頁面，證明登入成功
-app.get('/dashboard', checkLogin, (req, res) => {
-    // 這裡直接回傳簡單的 HTML，明天你可以改成 res.render('dashboard') 如果你有做 dashboard.hjs
-    res.send(`
-        <h1>登入成功！</h1>
-        <p>歡迎回來, ${res.locals.username}</p>
-        <a href="/logout">登出</a>
-    `);
-});
-
-const port = 80;
-app.listen(port, () => console.log(`FinalExam running on port ${port}`));
