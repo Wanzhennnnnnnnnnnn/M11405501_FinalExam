@@ -1,18 +1,16 @@
-// 這是一個範本，組員下載後請將此檔案改名為 config.js 並填入自己的資料庫密碼
-
 const config = {
     db: {
-        host: 'mysql_db',      
-        user: 'wan',           
-        password: '417', 
-        database: 'finalexam_db',
+        // 優先讀取 Docker 環境變數，如果沒有則使用本機預設值
+        host: process.env.DB_HOST || '127.0.0.1', 
+        user: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || '417',
+        database: process.env.DB_NAME || 'finalexam_db',
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0
     },
-    // 如果有 HTTPS 設定，也可以保留結構但留空路徑
     use_https: false,
-    port: 80
+    port: process.env.PORT || 80
 };
 
 module.exports = config;

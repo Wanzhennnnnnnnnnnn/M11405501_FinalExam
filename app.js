@@ -4,25 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const mysql = require('mysql2/promise');
 
-
-// Config 載入邏輯 
-let config;
-try {
-    if (process.env.DB_HOST && fs.existsSync(path.join(__dirname, 'config.docker.js'))) {
-        config = require('./config.docker');
-        console.log('Using config.docker.js settings');
-    } else {
-        config = require('./config');
-    }
-} catch (err) {
-    console.warn('Warning: config.js not found, attempting to fall back or use defaults.');
-    try {
-        config = require('./config.docker');
-    } catch (e) {
-        console.error('Critical: No configuration file found (config.js or config.docker.js).');
-        process.exit(1);
-    }
-}
+// Config 載入
+const config = require('./config');
 
 const app = express();
 app.set('view engine', 'hjs');
@@ -56,14 +39,14 @@ app.get('/forgot-password', (req, res) => {
     res.clearCookie('success');
 });
 
-// --- 認證路由 (Login/Register/Forgot PW) ---
+// --- 認證路由 ---
 
 // 登入
 app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         
-        // ★★★ 明天注意：如果不叫 Contractors 表，記得改這裡的 Table 名稱 ★★★
+        // ★★★ 明天注意：如果資料表不叫 Contractors，記得改這裡 ★★★
         const [rows] = await pool.execute('SELECT * FROM Contractors WHERE Email = ?', [email]);
         
         if (rows.length === 0 || rows[0].Password !== password) {
@@ -77,7 +60,6 @@ app.post('/login', async (req, res) => {
         res.cookie('userId', user.ContractorID, { signed: true });
         res.cookie('username', user.Name, { signed: true });
 
-        // ★★★ 原本是跳到 /contractor/dashboard，現在改為跳到下方新建立的簡單 Dashboard ★★★
         res.redirect('/dashboard');
 
     } catch (err) {
@@ -143,7 +125,7 @@ app.get('/logout', (req, res) => {
     res.redirect('/login');
 });
 
-// --- 中間件 (檢查是否登入) ---
+// --- 中間件 ---
 const checkLogin = (req, res, next) => {
     if (req.signedCookies.loggedIn === 'true') {
         res.locals.username = req.signedCookies.username;
@@ -154,10 +136,8 @@ const checkLogin = (req, res, next) => {
     }
 };
 
-
-// 新增一個簡單的登入後頁面，證明登入成功
+// 簡易 Dashboard
 app.get('/dashboard', checkLogin, (req, res) => {
-    // 這裡直接回傳簡單的 HTML，明天你可以改成 res.render('dashboard') 如果你有做 dashboard.hjs
     res.send(`
         <h1>登入成功！</h1>
         <p>歡迎回來, ${res.locals.username}</p>
@@ -165,5 +145,5 @@ app.get('/dashboard', checkLogin, (req, res) => {
     `);
 });
 
-const port = 80;
+const port = config.port || 80;
 app.listen(port, () => console.log(`FinalExam running on port ${port}`));
