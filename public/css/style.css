@@ -1,0 +1,139 @@
+/* Body Background */
+body { 
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #FFFFFF; 
+    color: #333;
+}
+
+/* Header Style: #C7C7E2, Text White */
+.nav-header {
+    background-color: #6a6a9d;
+    color: white;
+    border-bottom: 1px solid #b0b0cc;
+}
+
+/* Card Style: #F3F3FA, Long and Narrow layout */
+.simple-card {
+    background-color: #F3F3FA;
+    border: 1px solid #dcdce6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px; /* Spacing between cards */
+    width: 100%;
+}
+
+/* Button Style: #8080C0 */
+.btn-submit {
+    background-color: #6a6a9d;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+}
+.btn-submit:hover {
+    background-color: #6a6a9d;
+}
+
+/* Delete Button */
+.btn-delete {
+    background-color: #c53030;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+/* Input Box Style */
+.input-box {
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+    border-radius: 4px;
+    width: 100%; /* Fill available width */
+    background-color: #fff;
+}
+
+/* Table Style */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: white;
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+th {
+    background-color: #e8e8f0;
+}
+
+/* Tab Button Style */
+.tab-btn {
+    padding: 10px 25px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    margin-right: 5px;
+    cursor: pointer;
+    color: #666;
+}
+.tab-btn.active {
+    background-color: #F3F3FA; /* Match card background */
+    font-weight: bold;
+    color: #333;
+    border-bottom: 2px solid #F3F3FA; /* Cover bottom border */
+    position: relative;
+    top: 1px;
+    z-index: 10;
+}
+
+/* Flex Row Helper */
+.row-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    flex-wrap: wrap; /* Allow wrapping on very small screens */
+}
+.row-label {
+    white-space: nowrap;
+    font-size: 14px;
+    min-width: 80px; /* Fixed width for labels alignment */
+    font-weight: bold;
+    color: #555;
+}
+
+/* Layout Container: Narrower width for "long and narrow" feel */
+.layout-container {
+    max-width: 800px; /* Controls the width of the stack */
+    margin: 0 auto;
+}
+
+/* Info Icon Style */
+.info-icon {
+    color: #c2a8e4; /* Light Blue */
+    cursor: pointer;
+    margin-left: 8px;
+    transition: color 0.2s;
+}
+.info-icon:hover {
+    color: #6a6a9d; /* Darker Blue */
+}
+/* Description Text Style */
+.desc-text {
+    color: #666;
+    font-size: 0.9em;
+    background-color: #eef2ff;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border-left: 4px solid #8080C0;
+}
