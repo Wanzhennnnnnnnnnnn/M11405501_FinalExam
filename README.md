@@ -7,8 +7,8 @@ erDiagram
     %% 用於功能 3：選擇地區以顯示子區域統計
     %% ---------------------------------------------------------
     Region {
-        int id PK "主鍵"
-        string name "地區名稱 (如: Asia, Europe)"
+        int id PK 
+        string name 
     }
 
     %% ---------------------------------------------------------
@@ -17,9 +17,9 @@ erDiagram
     %% 用於功能 3：聚合計算該區域的最大 SRB
     %% ---------------------------------------------------------
     SubRegion {
-        int id PK "主鍵"
-        int region_id FK "歸屬地區 ID"
-        string name "子區域名稱 (如: Sub-Saharan Africa)"
+        int id PK
+        int region_id FK 
+        string name 
     }
 
     %% ---------------------------------------------------------
@@ -27,9 +27,9 @@ erDiagram
     %% 如果資料來源包含此層級 (如 UN M49)，需加入此表
     %% ---------------------------------------------------------
     Intermediate_Region {
-        int id PK "主鍵"
-        int sub_region_id FK "歸屬子區域 ID"
-        string name "中間區域名稱 (如: Eastern Africa)"
+        int id PK 
+        int sub_region_id FK 
+        string name 
     }
 
     %% ---------------------------------------------------------
@@ -38,10 +38,10 @@ erDiagram
     %% 用於功能 4：關鍵字搜尋國家名稱
     %% ---------------------------------------------------------
     Country {
-        int id PK "主鍵"
-        int intermediate_region_id FK "歸屬中間區域 ID"
-        string name "國家名稱 (如: Kenya)"
-        string iso_code "ISO 國碼 (選填)"
+        int id PK
+        int intermediate_region_id FK 
+        string name 
+        string iso_code 
     }
 
     %% ---------------------------------------------------------
@@ -51,17 +51,17 @@ erDiagram
     %% ---------------------------------------------------------
     SRB_Data {
         int id PK "主鍵"
-        int country_id FK "對應國家 ID"
-        int year "年份 (下拉選單來源 / 範圍刪除依據)"
-        float srb_value "出生性別比數值"
-        datetime updated_at "最後更新時間 (選填)"
+        int country_id FK 
+        int year 
+        float srb_value 
+        datetime updated_at 
     }
 
     %% ---------------------------------------------------------
     %% 關係定義 (Relationships)
     %% ---------------------------------------------------------
-    Region ||--|{ SubRegion : "包含 (1-to-Many)"
-    SubRegion ||--o{ Intermediate_Region : "包含 (1-to-Many)"
-    Intermediate_Region ||--|{ Country : "包含 (1-to-Many)"
-    Country ||--o{ SRB_Data : "擁有多筆歷年紀錄 (1-to-Many)"
+    Region ||--|{ SubRegion 
+    SubRegion ||--o{ Intermediate_Region
+    Intermediate_Region ||--|{ Country
+    Country ||--o{ SRB_Data
 ```
