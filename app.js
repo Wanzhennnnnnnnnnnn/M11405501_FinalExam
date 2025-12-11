@@ -1,16 +1,24 @@
 const express = require('express');
 const path = require('path');
-const config = require('./config'); // 重要：載入 config 設定
+const session = require('express-session'); // 新增 session
+const config = require('./config'); 
 const app = express();
 
-// 重要：從 config 讀取 PORT。
-// 在 Docker 中 config.port 會是 80，這符合 docker-compose 的 "3000:80" 設定
 const port = config.port || 3000;
 
-// *** 關鍵修正：加入 Body Parser Middleware ***
-// 必須在載入路由之前加入這些設定，否則 req.body 會是 undefined
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// *** 設定 Session ***
+// 這讓伺服器可以記住使用者的登入狀態
+app.use(session({
+    secret: 'srb_secret_key_123', // 實際專案應使用更複雜的密鑰
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        maxAge: 3600000 // 1 小時後過期
+    } 
+}));
 
 // 設定 View Engine
 app.set('views', path.join(__dirname, 'views'));
@@ -19,7 +27,13 @@ app.set('view engine', 'ejs');
 // 設定靜態檔案
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 載入路由 (必須在 body parser 之後)
+// 讓所有 view 都能讀取到 user 資訊 (用於顯示導覽列的登出按鈕)
+app.use((req, res, next) => {
+    res.locals.user = req.session.user;
+    next();
+});
+
+// 載入路由
 const indexRouter = require('./routes/index');
 app.use('/', indexRouter);
 

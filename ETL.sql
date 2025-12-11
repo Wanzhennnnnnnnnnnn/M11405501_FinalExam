@@ -103,6 +103,15 @@ CREATE TABLE SRB_Data (
     UNIQUE KEY uk_country_year (country_id, year) 
 );
 
+-- [Table 5 - NEW] Users (使用者帳號表)
+CREATE TABLE Users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- ----------------------------------------------------------
 -- 5. 轉換與資料清洗 (Transform & Clean)
 -- ----------------------------------------------------------
@@ -172,4 +181,6 @@ SELECT 'SubRegions Count', COUNT(*) FROM SubRegion
 UNION ALL
 SELECT 'Countries Count', COUNT(*) FROM Country
 UNION ALL
-SELECT 'SRB Records Count', COUNT(*) FROM SRB_Data;
+SELECT 'SRB Records Count', COUNT(*) FROM SRB_Data
+UNION ALL
+SELECT 'Users Count', COUNT(*) FROM Users;

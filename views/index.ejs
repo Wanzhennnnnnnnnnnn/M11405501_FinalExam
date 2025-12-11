@@ -16,10 +16,20 @@
 
     <!-- Header -->
     <nav class="nav-header p-4 mb-6">
-        <div class="container mx-auto">
+        <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold">
                 <i class="fas fa-database mr-2"></i>SRB Data Management System
             </h1>
+            
+            <!-- User Info & Logout -->
+            <% if (typeof user !== 'undefined' && user) { %>
+                <div class="flex items-center gap-4 text-sm">
+                    <span class="opacity-90">Hi, <strong><%= user.name %></strong></span>
+                    <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition text-xs font-bold">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </a>
+                </div>
+            <% } %>
         </div>
     </nav>
 
